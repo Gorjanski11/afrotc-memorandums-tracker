@@ -10,6 +10,7 @@ import { usePmtEvents } from "./hooks/usePmtEvents";
 import { useAbsenceMemos } from "./hooks/useAbsenceMemos";
 import { useDeviationMemos } from "./hooks/useDeviationMemos";
 import { useAttendanceLink } from "./hooks/useAttendanceLink";
+import { useAttendanceRecords } from "./hooks/useAttendanceRecords";
 import { useTheme } from "./hooks/useTheme";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { AbsenceMemosScreen } from "./screens/AbsenceMemosScreen";
@@ -37,12 +38,15 @@ function App() {
   const absenceState = useAbsenceMemos();
   const deviationState = useDeviationMemos();
   const attendanceLink = useAttendanceLink();
+  const attendanceRecordsState = useAttendanceRecords();
   const { theme, toggleTheme } = useTheme();
 
   const [screen, setScreen] = useState<Screen>("dashboard");
 
-  const dataLoading = rosterState.loading || eventsState.loading || absenceState.loading || deviationState.loading || attendanceLink.loading;
-  const loadError = rosterState.error || eventsState.error || absenceState.error || deviationState.error || attendanceLink.error;
+  const dataLoading =
+    rosterState.loading || eventsState.loading || absenceState.loading || deviationState.loading || attendanceLink.loading || attendanceRecordsState.loading;
+  const loadError =
+    rosterState.error || eventsState.error || absenceState.error || deviationState.error || attendanceLink.error || attendanceRecordsState.error;
 
   return (
     <div className="flex h-screen flex-col">
@@ -113,7 +117,13 @@ function App() {
             <>
               <TabsContent value="dashboard">
                 <AnimatedPanel>
-                  <DashboardScreen absenceMemos={absenceState.memos} deviationMemos={deviationState.memos} />
+                  <DashboardScreen
+                    roster={rosterState.roster}
+                    events={eventsState.events}
+                    attendance={attendanceRecordsState.records}
+                    absenceMemos={absenceState.memos}
+                    deviationMemos={deviationState.memos}
+                  />
                 </AnimatedPanel>
               </TabsContent>
               <TabsContent value="absence">
