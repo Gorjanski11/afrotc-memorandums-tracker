@@ -37,6 +37,10 @@ function HeroStat({ icon, label, value, tone, index }: { icon: React.ReactNode; 
   );
 }
 
+// Absence Memo tracking only starts here -- everything before this was recorded on a different
+// platform before this site existed, so it's excluded from the "no memo filed" flag entirely.
+const ABSENCE_MEMO_TRACKING_START = "2026-09-21";
+
 export function DashboardScreen({ roster, events, attendance, absenceMemos, deviationMemos }: Props) {
   const pendingAbsence = useMemo(() => absenceMemos.filter((m) => m.status === "Pending"), [absenceMemos]);
   const awaitingSubmission = useMemo(() => deviationMemos.filter((m) => m.status === "Assigned"), [deviationMemos]);
@@ -56,7 +60,7 @@ export function DashboardScreen({ roster, events, attendance, absenceMemos, devi
     return attendance
       .filter((a) => a.status === "A" && !covered.has(`${a.cadetId}__${a.pmtEventId}`))
       .map((a) => ({ record: a, cadet: rosterById.get(a.cadetId), event: eventsById.get(a.pmtEventId) }))
-      .filter((row) => row.cadet && row.event)
+      .filter((row) => row.cadet && row.event && row.event.eventDate >= ABSENCE_MEMO_TRACKING_START)
       .sort((a, b) => (b.event!.eventDate ?? "").localeCompare(a.event!.eventDate ?? ""));
   }, [attendance, absenceMemos, roster, events]);
 
