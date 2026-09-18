@@ -25,6 +25,15 @@ export type PmtEventType = (typeof PMT_EVENT_TYPES)[number];
 export const ABSENCE_REASONS = ["Academics", "Medical", "Personal", "Work/Job", "Other"] as const;
 export type AbsenceReason = (typeof ABSENCE_REASONS)[number];
 
+// AS Class options for an academic-class absence (as opposed to a PMT absence) -- deliberately a
+// narrower list than the full roster AS_LEVELS above (no AS250/AS500/AS600 -- those don't have
+// their own AS-class instruction block).
+export const ABSENCE_AS_CLASSES = ["AS100", "AS200", "AS300", "AS400"] as const;
+export type AbsenceAsClass = (typeof ABSENCE_AS_CLASSES)[number];
+
+export const INSTRUCTORS = ["Lt Col Laboy", "Capt Jackson", "Capt Deaton", "TSgt Reynoso"] as const;
+export type Instructor = (typeof INSTRUCTORS)[number];
+
 /** Absence Memo review states. Accepted -> flips the covered Attendance record(s) PE to AE. Rejected -> flips PE to A. Returned -> sent back to the cadet to fix/resubmit, no Attendance side-effect yet. */
 export const ABSENCE_MEMO_STATUSES = ["Pending", "Accepted", "Rejected", "Returned"] as const;
 export type AbsenceMemoStatus = (typeof ABSENCE_MEMO_STATUSES)[number];

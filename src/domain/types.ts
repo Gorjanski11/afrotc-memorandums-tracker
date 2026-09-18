@@ -1,4 +1,4 @@
-import type { AbsenceMemoStatus, AbsenceReason, AsLevel, DeviationMemoStatus, PmtEventType } from "./constants";
+import type { AbsenceAsClass, AbsenceMemoStatus, AbsenceReason, AsLevel, DeviationMemoStatus, Instructor, PmtEventType } from "./constants";
 
 /** The shared roster -- same Firestore `cadets` collection the TO's and Accountability sites read/write. Read-only here; this site never edits a roster record directly. */
 export interface RosterPerson {
@@ -31,9 +31,18 @@ export interface AbsenceMemo {
   id: string;
   cadetId: string;
   cadetName: string;
-  asClass: AsLevel | undefined;
-  /** Every PMT this single memo covers -- a cadet who missed a whole day (PT + LLAB + FM) submits one memo, not three. */
+  /** Every PMT this single memo covers -- a cadet who missed a whole day (PT + LLAB + FM) submits one memo, not three. Empty when this memo is only for an AS-Class absence below. */
   pmtEventIds: string[];
+  /**
+   * AS-Class-absence fields -- a memo can cover a missed PMT, a missed AS-Class session, or both.
+   * All four are set together or not at all: which AS Class, the date (manually entered -- an
+   * academic-class absence isn't tied to any PMT calendar entry), the material/title covered that
+   * day, and the instructor.
+   */
+  asClass: AbsenceAsClass | undefined;
+  classDate: string | undefined;
+  classTitle: string | undefined;
+  instructor: Instructor | undefined;
   reason: AbsenceReason;
   /** Whether medical documentation was sent to the detachment separately from this memo (Medical reason only, but tracked regardless). */
   medicalDocSent: boolean;

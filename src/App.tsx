@@ -119,10 +119,8 @@ function App() {
               <TabsContent value="absence">
                 <AnimatedPanel>
                   <AbsenceMemosScreen
-                    roster={rosterState.roster}
                     events={eventsState.events}
                     memos={absenceState.memos}
-                    createMemo={absenceState.createMemo}
                     updateMemo={absenceState.updateMemo}
                     applyMemoDecision={attendanceLink.applyMemoDecision}
                   />

@@ -51,6 +51,13 @@ export function HistoryScreen({ roster, events, absenceMemos, deviationMemos }: 
     return e ? `${e.eventType} ${new Date(e.eventDate).toLocaleDateString()}` : "deleted PMT";
   };
 
+  const coverageSummary = (m: AbsenceMemo): string => {
+    const parts: string[] = [];
+    if (m.pmtEventIds.length > 0) parts.push(m.pmtEventIds.map(eventLabel).join(", "));
+    if (m.asClass) parts.push(`${m.asClass} class (${m.classDate ? new Date(m.classDate).toLocaleDateString() : "no date"})`);
+    return parts.join(" + ") || "—";
+  };
+
   return (
     <div>
       <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
@@ -97,7 +104,7 @@ export function HistoryScreen({ roster, events, absenceMemos, deviationMemos }: 
                 <TableHeader>
                   <TableRow>
                     <TableHead>Submitted</TableHead>
-                    <TableHead>PMTs</TableHead>
+                    <TableHead>Covers</TableHead>
                     <TableHead>Reason</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>PDF</TableHead>
@@ -107,7 +114,9 @@ export function HistoryScreen({ roster, events, absenceMemos, deviationMemos }: 
                   {cadetAbsenceMemos.map((m) => (
                     <TableRow key={m.id}>
                       <TableCell>{new Date(m.submittedAt).toLocaleDateString()}</TableCell>
-                      <TableCell>{m.pmtEventIds.map(eventLabel).join(", ")}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={coverageSummary(m)}>
+                        {coverageSummary(m)}
+                      </TableCell>
                       <TableCell>{m.reason}</TableCell>
                       <TableCell>
                         <AbsenceStatusBadge status={m.status} />

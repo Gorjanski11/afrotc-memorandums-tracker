@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { addDoc, collection, doc, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { sanitizeForFirestore } from "../lib/firestoreUtils";
-import type { AbsenceMemoStatus, AbsenceReason, AsLevel } from "../domain/constants";
+import type { AbsenceAsClass, AbsenceMemoStatus, AbsenceReason, Instructor } from "../domain/constants";
 import type { AbsenceMemo } from "../domain/types";
 
 const COLLECTION = "absenceMemos";
@@ -10,8 +10,11 @@ const COLLECTION = "absenceMemos";
 export interface AbsenceMemoInput {
   cadetId: string;
   cadetName: string;
-  asClass: AsLevel | undefined;
   pmtEventIds: string[];
+  asClass: AbsenceAsClass | undefined;
+  classDate: string | undefined;
+  classTitle: string | undefined;
+  instructor: Instructor | undefined;
   reason: AbsenceReason;
   medicalDocSent: boolean;
   pdfUrl: string | undefined;
@@ -30,8 +33,11 @@ function mapMemo(id: string, data: Record<string, unknown>): AbsenceMemo {
     id,
     cadetId: (data.cadetId as string) ?? "",
     cadetName: (data.cadetName as string) ?? "",
-    asClass: (data.asClass as AsLevel | null | undefined) ?? undefined,
     pmtEventIds: (data.pmtEventIds as string[]) ?? [],
+    asClass: (data.asClass as AbsenceAsClass | null | undefined) ?? undefined,
+    classDate: (data.classDate as string | null | undefined) ?? undefined,
+    classTitle: (data.classTitle as string | null | undefined) ?? undefined,
+    instructor: (data.instructor as Instructor | null | undefined) ?? undefined,
     reason: ((data.reason as AbsenceReason) ?? "Other") as AbsenceReason,
     medicalDocSent: (data.medicalDocSent as boolean) ?? false,
     pdfUrl: (data.pdfUrl as string | null | undefined) ?? undefined,

@@ -10,7 +10,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { ClipboardList, ExternalLink, UserPlus } from "lucide-react";
 import { CadetCombobox } from "../components/CadetCombobox";
-import { uploadMemoPdf } from "../lib/storage";
 import type { DeviationMemoStatus } from "../domain/constants";
 import type { DeviationMemo, RosterPerson } from "../domain/types";
 import type { DeviationMemoInput } from "../hooks/useDeviationMemos";
@@ -42,10 +41,6 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
   const [dueDate, setDueDate] = useState("");
   const [assigning, setAssigning] = useState(false);
   const [assignError, setAssignError] = useState<string | undefined>();
-
-  const [submittingId, setSubmittingId] = useState<string | undefined>();
-  const [submitFile, setSubmitFile] = useState<File | undefined>();
-  const [submitBusy, setSubmitBusy] = useState(false);
 
   const [reviewingId, setReviewingId] = useState<string | undefined>();
   const [reviewerName, setReviewerName] = useState("");
@@ -95,24 +90,6 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
     }
   };
 
-  const handleCadetSubmit = async (memo: DeviationMemo) => {
-    if (!submitFile) return;
-    setSubmitBusy(true);
-    try {
-      const uploaded = await uploadMemoPdf(submitFile, "deviationMemos", memo.cadetId);
-      await updateMemo(memo.id, {
-        pdfUrl: uploaded.url,
-        pdfFileName: uploaded.fileName,
-        status: "Submitted",
-        submittedAt: new Date().toISOString(),
-      });
-      setSubmittingId(undefined);
-      setSubmitFile(undefined);
-    } finally {
-      setSubmitBusy(false);
-    }
-  };
-
   const openReview = (memo: DeviationMemo) => {
     setReviewingId(memo.id);
     setReviewerName("");
@@ -135,7 +112,6 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
   };
 
   const reviewing = memos.find((m) => m.id === reviewingId);
-  const submittingMemo = memos.find((m) => m.id === submittingId);
 
   return (
     <div>
@@ -196,6 +172,7 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
           <Card>
             <CardHeader>
               <CardTitle>Awaiting cadet submission</CardTitle>
+              <CardDescription>Read-only here -- the cadet submits their PDF on the separate GMC/POC submission site.</CardDescription>
             </CardHeader>
             <CardContent className="pt-2">
               <Table aria-label="Assigned deviation memos">
@@ -205,7 +182,6 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
                     <TableHead>Reason</TableHead>
                     <TableHead>Assigned by</TableHead>
                     <TableHead>Due</TableHead>
-                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -218,16 +194,11 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
                         {m.dueDate ? new Date(m.dueDate).toLocaleDateString() : "—"}
                         {isOverdue(m) && " (overdue)"}
                       </TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="secondary" onClick={() => setSubmittingId(m.id)}>
-                          Submit PDF
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                   {assigned.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
                         Nothing outstanding.
                       </TableCell>
                     </TableRow>
@@ -322,38 +293,6 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
           </Card>
         </div>
       )}
-
-      <Dialog open={!!submittingMemo} onOpenChange={(o) => !o && setSubmittingId(undefined)}>
-        <DialogContent className="max-w-md">
-          {submittingMemo && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Submit — {submittingMemo.cadetName}</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4">
-                <p className="text-sm text-muted-foreground">{submittingMemo.reason}</p>
-                <div className="space-y-1.5">
-                  <Label>Memo PDF</Label>
-                  <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={(e) => setSubmitFile(e.target.files?.[0])}
-                    className="block w-full text-sm text-muted-foreground"
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="secondary" onClick={() => setSubmittingId(undefined)}>
-                  Cancel
-                </Button>
-                <Button disabled={!submitFile || submitBusy} onClick={() => handleCadetSubmit(submittingMemo)}>
-                  {submitBusy ? "Uploading..." : "Submit"}
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={!!reviewing} onOpenChange={(o) => !o && setReviewingId(undefined)}>
         <DialogContent className="max-w-lg">
