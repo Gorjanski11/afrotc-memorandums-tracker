@@ -6,7 +6,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { FileText, ExternalLink } from "lucide-react";
 import type { AbsenceMemoStatus } from "../domain/constants";
 import type { AbsenceMemo, PmtEvent } from "../domain/types";
@@ -32,20 +31,21 @@ function coverageSummary(m: AbsenceMemo, eventLabel: (id: string) => string): st
   return parts.join(" + ") || "—";
 }
 
+// Only OFC reviews Absence Memos -- there's no other reviewer to pick, so this is fixed rather than a free-text field.
+const OFC_REVIEWER = "Capt Deaton";
+
 /** Submission now lives on the separate GMC/POC submission site -- this screen is cadre review only. */
 export function AbsenceMemosScreen({ events, memos, updateMemo, applyMemoDecision }: Props) {
   const [reviewingId, setReviewingId] = useState<string | undefined>();
-  const [reviewerName, setReviewerName] = useState("");
   const [reviewNotes, setReviewNotes] = useState("");
   const [returnReason, setReturnReason] = useState("");
   const [deciding, setDeciding] = useState(false);
 
   const pendingMemos = useMemo(() => memos.filter((m) => m.status === "Pending").sort((a, b) => a.submittedAt.localeCompare(b.submittedAt)), [memos]);
-  const decidedMemos = useMemo(() => memos.filter((m) => m.status !== "Pending").sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)), [memos]);
+  const decidedMemos = useMemo(() => memos.filter((m) => m.status !== "Pending" && m.status !== "Assigned").sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)), [memos]);
 
   const openReview = (memo: AbsenceMemo) => {
     setReviewingId(memo.id);
-    setReviewerName("");
     setReviewNotes("");
     setReturnReason("");
   };
@@ -62,7 +62,7 @@ export function AbsenceMemosScreen({ events, memos, updateMemo, applyMemoDecisio
       await updateMemo(memo.id, {
         status: decision,
         reviewedAt: now,
-        reviewedBy: reviewerName.trim() || undefined,
+        reviewedBy: OFC_REVIEWER,
         reviewNotes,
         returnReason: decision === "Returned" ? returnReason : undefined,
         attendanceUpdatedAt,
@@ -210,9 +210,8 @@ export function AbsenceMemosScreen({ events, memos, updateMemo, applyMemoDecisio
                     </a>
                   )}
                 </div>
-                <div className="grid gap-1.5">
-                  <Label>Your name</Label>
-                  <Input value={reviewerName} onChange={(e) => setReviewerName(e.target.value)} placeholder="Who's reviewing this" />
+                <div className="text-sm text-muted-foreground">
+                  Reviewing as: <strong>{OFC_REVIEWER}</strong>
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Notes</Label>

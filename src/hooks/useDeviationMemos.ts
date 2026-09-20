@@ -47,8 +47,8 @@ export function useDeviationMemos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
+  const refetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const snap = await getDocs(collection(db, COLLECTION));
       setMemos(snap.docs.map((d) => mapMemo(d.id, d.data())));
@@ -56,7 +56,7 @@ export function useDeviationMemos() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load deviation memos.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -67,7 +67,7 @@ export function useDeviationMemos() {
   const createMemo = useCallback(
     async (input: DeviationMemoInput) => {
       const ref = await addDoc(collection(db, COLLECTION), { ...sanitizeForFirestore(input), createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      await refetch();
+      await refetch(true);
       return { id: ref.id, ...input } satisfies DeviationMemo;
     },
     [refetch]
@@ -76,7 +76,7 @@ export function useDeviationMemos() {
   const updateMemo = useCallback(
     async (id: string, input: Partial<DeviationMemoInput>) => {
       await updateDoc(doc(db, COLLECTION, id), { ...sanitizeForFirestore(input), updatedAt: serverTimestamp() });
-      await refetch();
+      await refetch(true);
     },
     [refetch]
   );

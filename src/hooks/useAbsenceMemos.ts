@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { addDoc, collection, doc, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, serverTimestamp, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { sanitizeForFirestore } from "../lib/firestoreUtils";
 import type { AbsenceAsClass, AbsenceMemoStatus, AbsenceReason, Instructor } from "../domain/constants";
@@ -11,6 +11,8 @@ export interface AbsenceMemoInput {
   cadetId: string;
   cadetName: string;
   pmtEventIds: string[];
+  attendanceIds: string[];
+  assignedAt: string | undefined;
   asClass: AbsenceAsClass | undefined;
   classDate: string | undefined;
   classTitle: string | undefined;
@@ -34,6 +36,8 @@ function mapMemo(id: string, data: Record<string, unknown>): AbsenceMemo {
     cadetId: (data.cadetId as string) ?? "",
     cadetName: (data.cadetName as string) ?? "",
     pmtEventIds: (data.pmtEventIds as string[]) ?? [],
+    attendanceIds: (data.attendanceIds as string[]) ?? [],
+    assignedAt: (data.assignedAt as string | null | undefined) ?? undefined,
     asClass: (data.asClass as AbsenceAsClass | null | undefined) ?? undefined,
     classDate: (data.classDate as string | null | undefined) ?? undefined,
     classTitle: (data.classTitle as string | null | undefined) ?? undefined,
@@ -57,8 +61,11 @@ export function useAbsenceMemos() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
+  // `silent` skips the loading flip -- App.tsx swaps to a full-page skeleton while any hook is
+  // loading, which would otherwise unmount whichever screen is mid-review the moment its own
+  // post-write refetch starts.
+  const refetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const snap = await getDocs(collection(db, COLLECTION));
       setMemos(snap.docs.map((d) => mapMemo(d.id, d.data())));
@@ -66,7 +73,7 @@ export function useAbsenceMemos() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load absence memos.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -77,7 +84,7 @@ export function useAbsenceMemos() {
   const createMemo = useCallback(
     async (input: AbsenceMemoInput) => {
       const ref = await addDoc(collection(db, COLLECTION), { ...sanitizeForFirestore(input), createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-      await refetch();
+      await refetch(true);
       return { id: ref.id, ...input } satisfies AbsenceMemo;
     },
     [refetch]
@@ -86,10 +93,18 @@ export function useAbsenceMemos() {
   const updateMemo = useCallback(
     async (id: string, input: Partial<AbsenceMemoInput>) => {
       await updateDoc(doc(db, COLLECTION, id), { ...sanitizeForFirestore(input), updatedAt: serverTimestamp() });
-      await refetch();
+      await refetch(true);
     },
     [refetch]
   );
 
-  return { memos, loading, error, refetch, createMemo, updateMemo };
+  const deleteMemo = useCallback(
+    async (id: string) => {
+      await deleteDoc(doc(db, COLLECTION, id));
+      await refetch(true);
+    },
+    [refetch]
+  );
+
+  return { memos, loading, error, refetch, createMemo, updateMemo, deleteMemo };
 }

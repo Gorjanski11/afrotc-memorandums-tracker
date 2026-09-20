@@ -32,8 +32,8 @@ export function useAttendanceLink() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
+  const refetch = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const snap = await getDocs(collection(db, COLLECTION));
       setRecords(snap.docs.map((d) => mapRecord(d.id, d.data())));
@@ -41,7 +41,7 @@ export function useAttendanceLink() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load attendance.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -54,7 +54,7 @@ export function useAttendanceLink() {
     async (cadetId: string, pmtEventIds: string[], newStatus: "AE" | "A") => {
       const targets = records.filter((r) => r.cadetId === cadetId && pmtEventIds.includes(r.pmtEventId) && r.status === "PE");
       await Promise.all(targets.map((r) => updateDoc(doc(db, COLLECTION, r.id), { status: newStatus, updatedAt: serverTimestamp() })));
-      if (targets.length > 0) await refetch();
+      if (targets.length > 0) await refetch(true);
       return targets.length;
     },
     [records, refetch]

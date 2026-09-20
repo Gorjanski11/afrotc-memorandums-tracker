@@ -20,12 +20,15 @@ export interface PmtEvent {
 
 /**
  * AbsenceMemoSubmissions -- a cadet's writeup covering one or more missed PMTs, with an uploaded
- * PDF (Firebase Storage, Blaze plan) as the actual memorandum document. On Accepted/Rejected, this
- * site writes a side-effect update into the Accountability site's shared `attendance` collection
- * (same Firebase project): each covered PMT's Attendance record flips PE -> AE (Accepted) or
- * PE -> A (Rejected). Returned has no Attendance side-effect -- it's sent back to the cadet first.
- * An excuse never reverts an absence-driven grade on the TO's side (per the user's explicit rule);
- * this site does not touch the TO's-site `completions` collection at all.
+ * PDF (Firebase Storage, Blaze plan) as the actual memorandum document. The Accountability site
+ * auto-creates the initial "Assigned" record the instant a cadet is marked Absent; the cadet then
+ * submits (via the Memo Submissions site) which flips the covered Attendance record(s) A -> PE. On
+ * Accepted/Rejected, this site writes a side-effect update into the Accountability site's shared
+ * `attendance` collection (same Firebase project): each covered PMT's Attendance record flips
+ * PE -> AE (Accepted) or PE -> A (Rejected, final). Returned has no Attendance side-effect (stays
+ * PE) -- it's sent back to the cadet to fix and resubmit. An excuse never reverts an absence-driven
+ * grade on the TO's side (per the user's explicit rule); this site does not touch the TO's-site
+ * `completions` collection at all.
  */
 export interface AbsenceMemo {
   id: string;
@@ -33,6 +36,10 @@ export interface AbsenceMemo {
   cadetName: string;
   /** Every PMT this single memo covers -- a cadet who missed a whole day (PT + LLAB + FM) submits one memo, not three. Empty when this memo is only for an AS-Class absence below. */
   pmtEventIds: string[];
+  /** Attendance doc ids parallel to `pmtEventIds` -- what actually gets flipped A->PE on submit and PE->AE/A on decision. Empty for AS-Class-only memos. */
+  attendanceIds: string[];
+  /** ISO datetime the Accountability site auto-created this as "Assigned" -- undefined for a memo the cadet created fresh (an AS-Class-only absence, never auto-assigned). Used for the 72-hour submission deadline. */
+  assignedAt: string | undefined;
   /**
    * AS-Class-absence fields -- a memo can cover a missed PMT, a missed AS-Class session, or both.
    * All four are set together or not at all: which AS Class, the date (manually entered -- an
