@@ -4,20 +4,22 @@ import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Moon, Sun, FileText, LayoutDashboard, ClipboardList, Search } from "lucide-react";
+import { Moon, Sun, FileText, LayoutDashboard, ClipboardList, Search, Mail } from "lucide-react";
 import { useRoster } from "./hooks/useRoster";
 import { usePmtEvents } from "./hooks/usePmtEvents";
 import { useAbsenceMemos } from "./hooks/useAbsenceMemos";
 import { useDeviationMemos } from "./hooks/useDeviationMemos";
 import { useAttendanceLink } from "./hooks/useAttendanceLink";
 import { useAttendanceRecords } from "./hooks/useAttendanceRecords";
+import { useEmailTemplates } from "./hooks/useEmailTemplates";
 import { useTheme } from "./hooks/useTheme";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { AbsenceMemosScreen } from "./screens/AbsenceMemosScreen";
 import { DeviationMemosScreen } from "./screens/DeviationMemosScreen";
 import { HistoryScreen } from "./screens/HistoryScreen";
+import { AutomaticMemorandumsScreen } from "./screens/AutomaticMemorandumsScreen";
 
-type Screen = "dashboard" | "absence" | "deviation" | "history";
+type Screen = "dashboard" | "absence" | "deviation" | "history" | "automatic";
 
 function AnimatedPanel({ children }: { children: React.ReactNode }) {
   return (
@@ -39,14 +41,27 @@ function App() {
   const deviationState = useDeviationMemos();
   const attendanceLink = useAttendanceLink();
   const attendanceRecordsState = useAttendanceRecords();
+  const emailTemplatesState = useEmailTemplates();
   const { theme, toggleTheme } = useTheme();
 
   const [screen, setScreen] = useState<Screen>("dashboard");
 
   const dataLoading =
-    rosterState.loading || eventsState.loading || absenceState.loading || deviationState.loading || attendanceLink.loading || attendanceRecordsState.loading;
+    rosterState.loading ||
+    eventsState.loading ||
+    absenceState.loading ||
+    deviationState.loading ||
+    attendanceLink.loading ||
+    attendanceRecordsState.loading ||
+    emailTemplatesState.loading;
   const loadError =
-    rosterState.error || eventsState.error || absenceState.error || deviationState.error || attendanceLink.error || attendanceRecordsState.error;
+    rosterState.error ||
+    eventsState.error ||
+    absenceState.error ||
+    deviationState.error ||
+    attendanceLink.error ||
+    attendanceRecordsState.error ||
+    emailTemplatesState.error;
 
   return (
     <div className="flex h-screen flex-col">
@@ -94,6 +109,10 @@ function App() {
             <TabsTrigger value="history">
               <Search className="h-3.5 w-3.5" />
               History
+            </TabsTrigger>
+            <TabsTrigger value="automatic">
+              <Mail className="h-3.5 w-3.5" />
+              Automatic Memorandums
             </TabsTrigger>
           </TabsList>
         </nav>
@@ -154,6 +173,11 @@ function App() {
                     absenceMemos={absenceState.memos}
                     deviationMemos={deviationState.memos}
                   />
+                </AnimatedPanel>
+              </TabsContent>
+              <TabsContent value="automatic">
+                <AnimatedPanel>
+                  <AutomaticMemorandumsScreen templates={emailTemplatesState.templates} saveTemplate={emailTemplatesState.saveTemplate} />
                 </AnimatedPanel>
               </TabsContent>
             </>
