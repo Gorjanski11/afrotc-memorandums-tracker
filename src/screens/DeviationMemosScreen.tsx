@@ -100,7 +100,7 @@ export function DeviationMemosScreen({ roster, memos, createMemo, updateMemo }: 
     setDeciding(true);
     try {
       await updateMemo(memo.id, {
-        status: decision === "Returned" ? "Assigned" : "Accepted",
+        status: decision,
         reviewedAt: new Date().toISOString(),
         reviewedBy: reviewerName.trim() || undefined,
         reviewNotes,
