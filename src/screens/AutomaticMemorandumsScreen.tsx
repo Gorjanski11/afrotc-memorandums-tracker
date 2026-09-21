@@ -29,50 +29,62 @@ const TEMPLATE_DEFS: TemplateDef[] = [
     id: "absence-assigned",
     label: "Absence Memo assigned",
     trigger: "Sent the instant a cadet is marked Absent in Accountability.",
-    placeholders: ["cadetName", "pmtLabel", "deadline"],
+    placeholders: ["cadetName", "pmtSessionLabel", "sessionEndTime", "deadline", "submitLink", "commanderTitle"],
     defaultSubject: "Absence Memorandum required -- 72 hours to submit",
     defaultBody:
-      "Hi {{cadetName}},<br><br>" +
-      "You were marked absent for {{pmtLabel}}. You have 72 hours from the end of that session to submit an Absence Memorandum, " +
-      "or the absence will stand as unexcused.<br><br>" +
-      "Deadline: {{deadline}}<br><br>" +
-      "Submit here: https://gorjanski11.github.io/afrotc-memo-submissions/",
+      "Good Morning, {{cadetName}},<br><br>" +
+      "You were marked absent for {{pmtSessionLabel}}. You have 72 hours from the end of that session ({{sessionEndTime}}) " +
+      "to submit an Absence Memorandum, or the absence will stand as unexcused.<br><br>" +
+      "Your deadline is on {{deadline}}<br><br>" +
+      "Submit here: {{submitLink}}<br><br>" +
+      "For any questions and concerns contact your {{commanderTitle}}.<br><br>" +
+      "<strong>This is an automated message, DO NOT reply to this email.</strong>",
   },
   {
     id: "absence-deadline-reminder",
     label: "Absence Memo -- 12 hours left",
     trigger: "Sent once, automatically, when an unsubmitted Absence Memo is within 12 hours of its 72-hour deadline.",
-    placeholders: ["cadetName", "pmtLabel", "deadline"],
+    placeholders: ["greeting", "cadetName", "pmtSessionLabel", "deadline", "submitLink", "commanderTitle"],
     defaultSubject: "Reminder: Absence Memorandum due in 12 hours",
     defaultBody:
-      "Hi {{cadetName}},<br><br>" +
-      "This is a reminder that your Absence Memorandum for {{pmtLabel}} is due by {{deadline}} -- less than 12 hours from now. " +
-      "If it isn't submitted by then, the absence will stand as unexcused.<br><br>" +
-      "Submit here: https://gorjanski11.github.io/afrotc-memo-submissions/",
+      "{{greeting}}, {{cadetName}},<br><br>" +
+      "This is a reminder that you only have 12 hours until your absence memorandum deadline for {{pmtSessionLabel}}.<br><br>" +
+      "Your deadline is on {{deadline}}<br><br>" +
+      "Submit here: {{submitLink}}<br><br>" +
+      "For any questions and concerns contact your {{commanderTitle}}.<br><br>" +
+      "<strong>This is an automated message, DO NOT reply to this email.</strong>",
   },
   {
     id: "absence-returned",
     label: "Absence Memo returned",
     trigger: "Sent when cadre returns an Absence Memo for fixes.",
-    placeholders: ["cadetName", "returnReason"],
+    placeholders: ["greeting", "cadetName", "returnReason", "deadline", "submitLink", "commanderTitle"],
     defaultSubject: "Your Absence Memorandum was returned -- 48 hours to resubmit",
     defaultBody:
-      "Hi {{cadetName}},<br><br>" +
-      "Your Absence Memorandum was returned for the following reason:<br>" +
-      "<em>{{returnReason}}</em><br><br>" +
+      "{{greeting}}, {{cadetName}},<br><br>" +
+      "Your absence memorandum was returned for the following reason:<br>" +
+      "{{returnReason}}<br><br>" +
       "Please fix it and resubmit within 48 hours.<br><br>" +
-      "Resubmit here: https://gorjanski11.github.io/afrotc-memo-submissions/",
+      "Your new deadline is on {{deadline}}<br><br>" +
+      "Submit here: {{submitLink}}<br><br>" +
+      "For any questions and concerns contact your {{commanderTitle}}.<br><br>" +
+      "<strong>This is an automated message, DO NOT reply to this email.</strong>",
   },
   {
     id: "deviation-returned",
     label: "Deviation Memo returned",
     trigger: "Sent when cadre returns a Deviation Memo for fixes.",
-    placeholders: ["cadetName"],
+    placeholders: ["greeting", "cadetName", "returnReason", "deadline", "submitLink", "commanderTitle"],
     defaultSubject: "Your Deviation Memorandum was returned -- 48 hours to resubmit",
     defaultBody:
-      "Hi {{cadetName}},<br><br>" +
-      "Your Deviation Memorandum was returned. Please fix it and resubmit within 48 hours.<br><br>" +
-      "Resubmit here: https://gorjanski11.github.io/afrotc-memo-submissions/",
+      "{{greeting}}, {{cadetName}},<br><br>" +
+      "Your deviation memorandum was returned for the following reason:<br>" +
+      "{{returnReason}}<br><br>" +
+      "Please fix it and resubmit within 48 hours.<br><br>" +
+      "Your new deadline is on {{deadline}}<br><br>" +
+      "Submit here: {{submitLink}}<br><br>" +
+      "For any questions and concerns contact your {{commanderTitle}}.<br><br>" +
+      "<strong>This is an automated message, DO NOT reply to this email.</strong>",
   },
 ];
 

@@ -1,10 +1,8 @@
 import { motion } from "motion/react";
-import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Moon, Sun, FileText, LayoutDashboard, ClipboardList, Search, Mail } from "lucide-react";
+import { FileText, LayoutDashboard, ClipboardList, Search, Mail } from "lucide-react";
 import { useRoster } from "./hooks/useRoster";
 import { usePmtEvents } from "./hooks/usePmtEvents";
 import { useAbsenceMemos } from "./hooks/useAbsenceMemos";
@@ -12,7 +10,6 @@ import { useDeviationMemos } from "./hooks/useDeviationMemos";
 import { useAttendanceLink } from "./hooks/useAttendanceLink";
 import { useAttendanceRecords } from "./hooks/useAttendanceRecords";
 import { useEmailTemplates } from "./hooks/useEmailTemplates";
-import { useTheme } from "./hooks/useTheme";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { AbsenceMemosScreen } from "./screens/AbsenceMemosScreen";
 import { DeviationMemosScreen } from "./screens/DeviationMemosScreen";
@@ -42,7 +39,6 @@ function App() {
   const attendanceLink = useAttendanceLink();
   const attendanceRecordsState = useAttendanceRecords();
   const emailTemplatesState = useEmailTemplates();
-  const { theme, toggleTheme } = useTheme();
 
   const [screen, setScreen] = useState<Screen>("dashboard");
 
@@ -75,20 +71,6 @@ function App() {
             <span className="text-sm text-muted-foreground">Absence & Deviation memos</span>
           </div>
         </div>
-        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle dark mode" className="overflow-hidden">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={theme}
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="flex"
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </motion.span>
-          </AnimatePresence>
-        </Button>
       </header>
 
       <Tabs value={screen} onValueChange={(v) => setScreen(v as Screen)} className="flex flex-1 flex-col overflow-hidden">
