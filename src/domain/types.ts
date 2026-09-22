@@ -1,4 +1,4 @@
-import type { AbsenceAsClass, AbsenceMemoStatus, AbsenceReason, AsLevel, DeviationMemoStatus, Instructor, PmtEventType } from "./constants";
+import type { AbsenceAsClass, AbsenceMemoStatus, AbsenceReason, AsLevel, DeviationMemoStatus, Group, Instructor, PmtEventType } from "./constants";
 
 /** The shared roster -- same Firestore `cadets` collection the TO's and Accountability sites read/write. Read-only here; this site never edits a roster record directly. */
 export interface RosterPerson {
@@ -8,6 +8,9 @@ export interface RosterPerson {
   devLevel: string | undefined;
   status: string | undefined;
   email: string | undefined;
+  /** Manual override -- when true this person is Cadre regardless of AS Level/devLevel. Used for the staff-access rule (domain/access.ts). */
+  isCadre: boolean;
+  group: Group | undefined;
 }
 
 /** Shared `pmtEvents` collection -- read-only here, used to let a memo reference which PMT(s) it covers. */

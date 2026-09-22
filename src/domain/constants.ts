@@ -8,6 +8,11 @@ export type AsLevel = (typeof AS_LEVELS)[number];
 export const ROSTER_CLASSES = ["Cadre", "POC", "GMC"] as const;
 export type RosterClass = (typeof ROSTER_CLASSES)[number];
 
+// Mirrors the Accountability site's GROUPS -- same shared `cadets` collection, same field. Used
+// here only for the TRG/CWL staff-access rule (see domain/access.ts).
+export const GROUPS = ["CWL", "TRG", "OG", "MSG", "WSG"] as const;
+export type Group = (typeof GROUPS)[number];
+
 const GMC_AS_LEVELS: readonly AsLevel[] = ["AS100", "AS200", "AS250", "AS500"];
 
 export function deriveClass(asLevel: AsLevel | undefined, isCadre: boolean): RosterClass {

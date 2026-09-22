@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import type { AsLevel } from "../domain/constants";
+import type { AsLevel, Group } from "../domain/constants";
 import type { RosterPerson } from "../domain/types";
 
 const COLLECTION = "cadets";
@@ -14,6 +14,8 @@ function mapPerson(id: string, data: Record<string, unknown>): RosterPerson {
     devLevel: data.devLevel as string | undefined,
     status: data.status as string | undefined,
     email: (data.email as string | null | undefined) ?? undefined,
+    isCadre: (data.isCadre as boolean | undefined) ?? false,
+    group: data.group as Group | undefined,
   };
 }
 
