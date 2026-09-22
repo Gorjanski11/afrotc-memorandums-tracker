@@ -2,7 +2,8 @@ import { motion } from "motion/react";
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, LayoutDashboard, ClipboardList, Search, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, LayoutDashboard, ClipboardList, Search, Mail, LogOut } from "lucide-react";
 import { useRoster } from "./hooks/useRoster";
 import { usePmtEvents } from "./hooks/usePmtEvents";
 import { useAbsenceMemos } from "./hooks/useAbsenceMemos";
@@ -10,6 +11,8 @@ import { useDeviationMemos } from "./hooks/useDeviationMemos";
 import { useAttendanceLink } from "./hooks/useAttendanceLink";
 import { useAttendanceRecords } from "./hooks/useAttendanceRecords";
 import { useEmailTemplates } from "./hooks/useEmailTemplates";
+import { useAuth } from "./hooks/useAuth";
+import { SignInScreen } from "./components/SignInScreen";
 import { DashboardScreen } from "./screens/DashboardScreen";
 import { AbsenceMemosScreen } from "./screens/AbsenceMemosScreen";
 import { DeviationMemosScreen } from "./screens/DeviationMemosScreen";
@@ -26,12 +29,13 @@ function AnimatedPanel({ children }: { children: React.ReactNode }) {
   );
 }
 
-// No login of any kind -- open to anyone with the link, same as the TO's and Accountability
-// sites. Same Firebase project/database: reads the shared `cadets` roster and `pmtEvents`
-// calendar, writes side-effect status flips into Accountability's `attendance` collection when an
-// Absence Memo is decided, and owns its own absenceMemos/deviationMemos collections plus real PDF
-// storage (Firebase Storage, Blaze plan).
+// Cadre-only login (Email/Password, accounts provisioned individually -- no public sign-up). Same
+// Firebase project/database as the TO's and Accountability sites: reads the shared `cadets` roster
+// and `pmtEvents` calendar, writes side-effect status flips into Accountability's `attendance`
+// collection when an Absence Memo is decided, and owns its own absenceMemos/deviationMemos
+// collections plus real PDF storage (Firebase Storage, Blaze plan).
 function App() {
+  const { user, authLoading, signIn, signOut } = useAuth();
   const rosterState = useRoster();
   const eventsState = usePmtEvents();
   const absenceState = useAbsenceMemos();
@@ -59,6 +63,18 @@ function App() {
     attendanceRecordsState.error ||
     emailTemplatesState.error;
 
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Skeleton className="h-10 w-48" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <SignInScreen signIn={signIn} />;
+  }
+
   return (
     <div className="flex h-screen flex-col">
       <header className="flex items-center justify-between border-b border-input bg-background px-8 py-3">
@@ -70,6 +86,12 @@ function App() {
             <h1 className="text-xl font-semibold">Borinkeneers Memorandums Tracker</h1>
             <span className="text-sm text-muted-foreground">Absence & Deviation memos</span>
           </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">{user.email}</span>
+          <Button variant="ghost" size="icon" onClick={() => void signOut()} aria-label="Sign out">
+            <LogOut className="h-4 w-4" />
+          </Button>
         </div>
       </header>
 
